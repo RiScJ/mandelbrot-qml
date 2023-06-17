@@ -4,6 +4,15 @@
 #include <QObject>
 #include <QScreen>
 #include <QImage>
+#include <QDebug>
+
+#define CL_HPP_ENABLE_EXCEPTIONS
+#include <CL/opencl.hpp>
+#include <CL/cl2.hpp>
+
+
+#include <thread>
+#include <fstream>
 
 class Mandelbrot : public QObject {
     Q_OBJECT
@@ -23,6 +32,11 @@ private:
     QColor color(int iterations);
 
     QImage m_image;
+    cl::Kernel m_kernel;
+    cl::Buffer m_iterations_buffer;
+    std::vector<uchar> m_iterations;
+
+    cl::CommandQueue m_queue;
 
     const int WIDTH;
     const int HEIGHT;

@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
     int screen_width = screen->geometry().width();
     int screen_height = screen->geometry().height();
 
-
     Mandelbrot* mb = new Mandelbrot(screen_width, screen_height);
     engine.rootContext()->setContextProperty("mb", mb);
 

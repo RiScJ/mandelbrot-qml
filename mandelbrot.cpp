@@ -1,37 +1,131 @@
 #include "mandelbrot.h"
 
-#include <thread>
 
 
 Mandelbrot::Mandelbrot(int width, int height, QObject* parent) :
     QObject(parent), WIDTH(width), HEIGHT(height) {
     QImage image(QSize(WIDTH, HEIGHT), QImage::Format_RGB888);
     m_image = image;
+
+    std::vector<cl::Platform> all_platforms;
+    cl::Platform::get(&all_platforms);
+    if (all_platforms.size() == 0) {
+        qDebug() << "No platforms found.";
+        exit(-1);
+    }
+
+    cl::Platform default_platform = all_platforms[0];
+    qDebug() << "Using platform: " << default_platform.getInfo<CL_PLATFORM_NAME>();
+
+    std::vector<cl::Device> all_devices;
+    default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
+    if (all_devices.size() == 0) {
+        qDebug() << "No devices found.";
+        exit(-1);
+    }
+
+    cl::Device default_device = all_devices[0];
+    qDebug() << "Using device: " << default_device.getInfo<CL_DEVICE_NAME>();
+
+    cl::Context context({default_device});
+
+    std::vector<uchar> iterations(WIDTH * HEIGHT * 3);
+    cl::Buffer iterations_d(context, CL_MEM_READ_WRITE, sizeof(uchar) * WIDTH * HEIGHT * 3);
+
+    cl::CommandQueue queue(context, default_device);
+
+    std::ifstream kernelFile("kernel.cl");
+    if (!kernelFile.is_open()) {
+        throw std::runtime_error("Failed to open kernel file");
+    }
+    std::string kernelSource((std::istreambuf_iterator<char>(kernelFile)), std::istreambuf_iterator<char>());
+    kernelFile.close();
+
+    cl::Program::Sources sources;
+    sources.push_back({ kernelSource.c_str(), kernelSource.length() });
+    cl::Program program(context, sources);
+
+    if (program.build({default_device}) != CL_SUCCESS) {
+        qDebug() << "Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device);
+        exit(-1);
+    }
+
+    auto kernel = cl::Kernel(program, "mandelbrot");
+
+    m_iterations_buffer = iterations_d;
+    m_kernel = kernel;
+    m_queue = queue;
+    m_iterations = iterations;
 }
 
 
 void Mandelbrot::update(double zoom, double offset_x, double offset_y) {
     uchar* image = new uchar[WIDTH * HEIGHT * 3];
 
-    const int ROWS_PER_THREAD = HEIGHT / std::thread::hardware_concurrency();
-    std::vector<std::thread> threads;
-    for (int i = 0; i < HEIGHT; i += ROWS_PER_THREAD) {
-        threads.push_back(std::thread(&Mandelbrot::update_slice,
-                                      this,
-                                      zoom,
-                                      offset_x,
-                                      offset_y,
-                                      std::ref(image),
-                                      i,
-                                      std::min(i + ROWS_PER_THREAD, HEIGHT))
-                          );
-    }
-    for (auto& t : threads) {
-        t.join();
+    m_kernel.setArg(0, m_iterations_buffer);
+    m_kernel.setArg(1, WIDTH);
+    m_kernel.setArg(2, HEIGHT);
+    m_kernel.setArg(3, DEPTH);
+    m_kernel.setArg(4, zoom);
+    m_kernel.setArg(5, offset_x);
+    m_kernel.setArg(6, offset_y);
+
+
+    try {
+        m_queue.enqueueNDRangeKernel(m_kernel,
+                                     cl::NullRange,
+                                     cl::NDRange(WIDTH * HEIGHT),
+                                     cl::NullRange);
+    } catch (cl::Error& e) {
+        qDebug() << "Error during kernel execution: "
+                 << e.what()
+                 << "(" << e.err() << ")";
     }
 
-    m_image = QImage(image, WIDTH, HEIGHT, QImage::Format_RGB888);
+    m_queue.enqueueReadBuffer(m_iterations_buffer,
+                              CL_TRUE,
+                              0,
+                              sizeof(uchar) * WIDTH * HEIGHT * 3,
+                              m_iterations.data());
+
+    int index;
+    int x;
+    int y;
+
+    m_image = QImage(m_iterations.data(), WIDTH, HEIGHT, QImage::Format::Format_RGB888);
+
+//    for (int id = 0; id < WIDTH * HEIGHT; id++) {
+//        col = Mandelbrot::color(m_iterations[id]);
+//        x = id % WIDTH;
+//        y = id / WIDTH;
+//        index = 3 * (WIDTH * y + x);
+//        image[index] = m_iterations[id];//col.red();
+//        image[index + 1] = m_iterations[id];//col.green();
+//        image[index + 2] = m_iterations[id];//col.blue();
+//    }
+//    m_image = QImage(image, WIDTH, HEIGHT, QImage::Format_RGB888);
     emit imageChanged(m_image);
+//    return;
+
+//    const int ROWS_PER_THREAD = HEIGHT / std::thread::hardware_concurrency();
+//    std::vector<std::thread> threads;
+//    for (int i = 0; i < HEIGHT; i += ROWS_PER_THREAD) {
+//        threads.push_back(std::thread(&Mandelbrot::update_slice,
+//                                      this,
+//                                      zoom,
+//                                      offset_x,
+//                                      offset_y,
+//                                      std::ref(image),
+//                                      i,
+//                                      std::min(i + ROWS_PER_THREAD, HEIGHT))
+//                          );
+//    }
+//    for (auto& t : threads) {
+//        t.join();
+//    }
+
+//    m_image = QImage(image, WIDTH, HEIGHT, QImage::Format_RGB888);
+//    emit imageChanged(m_image);
 }
 
 
