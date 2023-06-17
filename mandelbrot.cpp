@@ -2,11 +2,12 @@
 
 #include <thread>
 
+#include <QDebug>
 
 Mandelbrot::Mandelbrot(int width, int height, QObject* parent) :
     QObject(parent), WIDTH(width), HEIGHT(height) {
     QImage image(QSize(WIDTH, HEIGHT), QImage::Format_RGB888);
-    image.fill(QColor(255, 0, 0));
+//    image.fill(QColor(255, 0, 0));
     m_image = image;
 }
 
@@ -47,6 +48,7 @@ int Mandelbrot::height(void) {
 
 
 void Mandelbrot::update(void) {
+    qDebug() << "This is apparently beign called";
     emit imageChanged(m_image);
 }
 
@@ -54,16 +56,18 @@ void Mandelbrot::update(void) {
 void Mandelbrot::update_slice(double zoom, double offset_x, double offset_y,
                         uchar* image, int min_y, int max_y) {
     double real = -0.5 * WIDTH * zoom + offset_x;
-    double imag = min_y * zoom - 0.5 * HEIGHT * zoom + offset_y;
+    double imag0 = min_y * zoom - 0.5 * HEIGHT * zoom + offset_y;
 
     int iterations;
     QColor col;
     int index;
+    double imag;
 
     for (int x = 0; x < WIDTH; x++, real += zoom) {
+        imag = imag0;
         for (int y = min_y; y < max_y; y++, imag += zoom) {
             iterations = Mandelbrot::mandelbrot(real, imag);
-            col = Mandelbrot::color(value);
+            col = Mandelbrot::color(iterations);
             index = 3 * (WIDTH * y + x);
             image[index] = col.red();
             image[index + 1] = col.green();
