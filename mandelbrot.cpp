@@ -78,7 +78,6 @@ Mandelbrot::Mandelbrot(int width, int height, QObject* parent) :
 
 void Mandelbrot::update(double zoom, double offset_x, double offset_y) {
     uchar* image = new uchar[WIDTH * HEIGHT * 3];
-
     if (GPU_ACCELERATED) {
         m_kernel.setArg(0, m_iterations_buffer);
         m_kernel.setArg(1, WIDTH);
@@ -140,6 +139,10 @@ int Mandelbrot::height(void) const {
     return HEIGHT;
 }
 
+
+void Mandelbrot::force_cpu(void) {
+    GPU_ACCELERATED = false;
+}
 
 
 void Mandelbrot::update_slice(double zoom, double offset_x, double offset_y,

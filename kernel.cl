@@ -12,12 +12,23 @@ __kernel void mandelbrot(__global uchar* image, int WIDTH, int HEIGHT,
     real = real + (zoom * x);
     imag = imag + (zoom * y);
 
-
     double real0 = real;
     double imag0 = imag;
 
     double r2;
     double i2;
+
+    int index = 3 * (WIDTH * y + x);
+
+    double cardioid_param = (real - 0.25) * (real - 0.25);
+    cardioid_param += imag * imag;
+    cardioid_param = 4.0 * cardioid_param * (cardioid_param + (real - 0.25));
+    if (cardioid_param <= imag * imag) {
+        image[index] = 0;
+        image[index + 1] = 0;
+        image[index + 2] = 0;
+        return;
+    }
 
     int iterations = DEPTH;
     for (int i = 0; i < DEPTH; i++) {
@@ -62,7 +73,6 @@ __kernel void mandelbrot(__global uchar* image, int WIDTH, int HEIGHT,
         }
     }
 
-    int index = 3 * (WIDTH * y + x);
     image[index] = r;
     image[index + 1] = g;
     image[index + 2] = b;

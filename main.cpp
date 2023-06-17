@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     mb->update(0.004, 0, 0);
     engine.addImageProvider("mb_provider", mb_provider);
 
+
     engine.loadFromModule("mandelbrot-qml", "Main");
     return app.exec();
 }

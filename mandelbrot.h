@@ -20,7 +20,8 @@ public:
     explicit Mandelbrot(int width, int height, QObject* parent = nullptr);
     Q_INVOKABLE void update(double zoom, double offset_x, double offset_y);
     Q_INVOKABLE int width(void) const;
-    Q_INVOKABLE int height(void) const;
+    Q_INVOKABLE int height(void) const;;
+    void force_cpu(void);
 
 signals:
     void imageChanged(QImage image);

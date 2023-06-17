@@ -38,8 +38,7 @@ Window {
         id: mandelbrot
         x: 0
         y: 0
-        width: imageW
-        height: imageH
+        anchors.fill: parent
         source: "image://mb_provider"
 
         MouseArea {
