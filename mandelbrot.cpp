@@ -77,6 +77,10 @@ int Mandelbrot::mandelbrot(double real, double imag) {
     double r2;
     double i2;
 
+    double real_old = 0;
+    double imag_old = 0;
+    int period = 0;
+
     for (int iterations = 0; iterations < DEPTH; ++iterations) {
         r2 = real * real;
         i2 = imag * imag;
@@ -86,6 +90,14 @@ int Mandelbrot::mandelbrot(double real, double imag) {
         imag *= 2.0 * real;
         imag += imag0;
         real = r2 - i2 + real0;
+        if (std::fabs(real - real_old) < PERIODICITY_EPSILON
+            && std::fabs(imag - imag_old < PERIODICITY_EPSILON)) break;
+        period++;
+        if (period == MAX_PERIOD) {
+            period = 0;
+            real_old = real;
+            imag_old = imag;
+        }
     }
     return DEPTH;
 }

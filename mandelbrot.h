@@ -28,6 +28,8 @@ private:
     const int HEIGHT;
     constexpr static int DEPTH = 127;
     constexpr static double DIVERGENCE_BOUND_SQ = 4.0;
+    constexpr static double PERIODICITY_EPSILON = 1e-5;
+    constexpr static int MAX_PERIOD = 10;
 };
 
 #endif // MANDELBROT_H
