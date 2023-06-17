@@ -81,6 +81,11 @@ int Mandelbrot::mandelbrot(double real, double imag) {
     double imag_old = 0;
     int period = 0;
 
+    double cardioid_param = (real - 0.25) * (real - 0.25);
+    cardioid_param += imag * imag;
+    cardioid_param = 4.0 * cardioid_param * (cardioid_param + (real - 0.25));
+    if (cardioid_param <= imag * imag) return DEPTH;
+
     for (int iterations = 0; iterations < DEPTH; ++iterations) {
         r2 = real * real;
         i2 = imag * imag;
