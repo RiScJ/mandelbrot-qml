@@ -20,6 +20,10 @@ qt_add_qml_module(appmandelbrot-qml
     QML_FILES Main.qml
 )
 
+include_directories(${OpenCL_INCLUDE_DIRS})
+
+link_directories(${OpenCL_LIBRARY})
+
 set_target_properties(appmandelbrot-qml PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
