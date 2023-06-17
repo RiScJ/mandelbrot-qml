@@ -8,7 +8,7 @@
 class Mandelbrot : public QObject {
     Q_OBJECT
 public:
-    explicit Mandelbrot(QScreen screen, QObject* parent = nullptr);
+    explicit Mandelbrot(int width, int height, QObject* parent = nullptr);
     Q_INVOKABLE void update(double zoom, double offset_x, double offset_y);
     Q_INVOKABLE int width(void);
     Q_INVOKABLE int height(void);

@@ -3,8 +3,8 @@
 #include <thread>
 
 
-Mandelbrot::Mandelbrot(QScreen screen, QObject* parent) : QObject(parent),
-    WIDTH(screen.geometry().width()), HEIGHT(screen.geometry().height()) {
+Mandelbrot::Mandelbrot(int width, int height, QObject* parent) :
+    QObject(parent), WIDTH(width), HEIGHT(height) {
     QImage image(QSize(WIDTH, HEIGHT), QImage::Format_RGB888);
     image.fill(QColor(255, 0, 0));
     m_image = image;

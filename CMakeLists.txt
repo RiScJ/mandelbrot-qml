@@ -11,6 +11,7 @@ qt_standard_project_setup(REQUIRES 6.5)
 qt_add_executable(appmandelbrot-qml
     main.cpp
     mandelbrot.h mandelbrot.cpp
+    mandelbrot_provider.h mandelbrot_provider.cpp
 )
 
 qt_add_qml_module(appmandelbrot-qml
