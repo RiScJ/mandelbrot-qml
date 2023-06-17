@@ -2,7 +2,6 @@
 
 #include <thread>
 
-#include <QDebug>
 
 Mandelbrot::Mandelbrot(int width, int height, QObject* parent) :
     QObject(parent), WIDTH(width), HEIGHT(height) {
@@ -36,20 +35,15 @@ void Mandelbrot::update(double zoom, double offset_x, double offset_y) {
 }
 
 
-int Mandelbrot::width(void) {
+int Mandelbrot::width(void) const {
     return WIDTH;
 }
 
 
-int Mandelbrot::height(void) {
+int Mandelbrot::height(void) const {
     return HEIGHT;
 }
 
-
-void Mandelbrot::update(void) {
-    qDebug() << "This is apparently beign called";
-    emit imageChanged(m_image);
-}
 
 
 void Mandelbrot::update_slice(double zoom, double offset_x, double offset_y,

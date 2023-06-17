@@ -10,14 +10,13 @@ class Mandelbrot : public QObject {
 public:
     explicit Mandelbrot(int width, int height, QObject* parent = nullptr);
     Q_INVOKABLE void update(double zoom, double offset_x, double offset_y);
-    Q_INVOKABLE int width(void);
-    Q_INVOKABLE int height(void);
+    Q_INVOKABLE int width(void) const;
+    Q_INVOKABLE int height(void) const;
 
 signals:
     void imageChanged(QImage image);
 
 private:
-    void update(void);
     void update_slice(double zoom, double offset_x, double offset_y,
                       uchar* image, int min_y, int max_y);
     int mandelbrot(double real, double imag);
