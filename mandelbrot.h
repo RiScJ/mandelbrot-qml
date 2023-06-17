@@ -35,8 +35,8 @@ private:
     cl::Kernel m_kernel;
     cl::Buffer m_iterations_buffer;
     std::vector<uchar> m_iterations;
-
     cl::CommandQueue m_queue;
+    bool GPU_ACCELERATED;
 
     const int WIDTH;
     const int HEIGHT;
